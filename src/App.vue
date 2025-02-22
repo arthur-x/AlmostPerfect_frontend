@@ -153,8 +153,6 @@ export default {
           reader.readAsText(scoreFile)
         })
         this.scores = { ...scoreData }
-      } else {
-        this.scores = {}
       }
 
       const imageFiles = files.filter(file => file.type.startsWith('image/'))
