@@ -41,14 +41,13 @@
         class="grid-item"
         @click="openLightbox(index)"
       >
-        <div class="image-wrapper">
-          <img 
-            :src="image.url" 
-            :alt="image.name"
-            class="grid-image"
-            loading="lazy"
-          />
-        </div>
+        <img 
+          :src="image.url" 
+          :alt="image.name"
+          :data-ratio="image.ratio"
+          class="grid-image"
+          loading="lazy"
+        />
         <div class="score-badge" :class="{ positive: scores[image.name] > 0, negative: scores[image.name] < 0 }" v-if="shouldShowBadge(image)">
           {{ formatScore(image) }}
         </div>
@@ -163,10 +162,15 @@ export default {
         return new Promise((resolve) => {
           const reader = new FileReader()
           reader.onload = (e) => {
-            resolve({
-              name: file.name,
-              url: e.target.result
-            })
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+              resolve({
+                name: file.name,
+                url: e.target.result,
+                ratio: img.width > img.height ? 'landscape' : 'portrait'
+              })
+            }
           }
           reader.readAsDataURL(file)
         })
@@ -262,10 +266,21 @@ export default {
 }
 
 .grid-image {
-  width: 100%;
-  height: 100%;
+  position: absolute;
   object-fit: cover;
   border-radius: inherit;
+}
+
+.grid-image[data-ratio="landscape"] {
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+}
+
+.grid-image[data-ratio="portrait"] {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
 }
 
 .lightbox {
@@ -402,10 +417,6 @@ export default {
 
 .score-badge.negative {
   background: #f44336;
-}
-
-.image-wrapper {
-  position: relative;
 }
 
 .filter-checkbox {
